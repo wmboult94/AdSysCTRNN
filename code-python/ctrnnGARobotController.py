@@ -39,9 +39,10 @@ def eval_genome(genome, config):
 		# Run the given simulation for up to num_steps time steps.
 		fitness = 0.0
 		poses, sensations, actions, states = w.simulateNN(ctrnnController,net)
-		fitness1 = w.task1fitness(poses)
-		fitness2 = w.task2fitness(poses)
-		fitness = float((fitness1 + fitness2) / 2)
+		fitness1 = -500 if w.task1fitness(poses) == -np.inf else w.task1fitness(poses)
+		fitness2 = -500 if w.task2fitness(poses) == -np.inf else w.task2fitness(poses)
+		fitness3 = np.sum(sensations)
+		fitness = float((fitness1 + fitness2 + fitness3) / 3)
 
 		fitnesses.append(fitness)
 
@@ -71,11 +72,11 @@ def run():
 	pop.add_reporter(stats)
 	pop.add_reporter(neat.StdOutReporter(True))
 
-	if 0:
-		winner = pop.run(eval_genomes,n=50)
-	else:
-		pe = neat.ParallelEvaluator(4, eval_genome)
-		winner = pop.run(pe.evaluate,n=50)
+	# if 0:
+	# 	winner = pop.run(eval_genomes,n=50)
+	# else:
+	pe = neat.ParallelEvaluator(4, eval_genome)
+	winner = pop.run(pe.evaluate,n=50)
 
 	# Save the winner.
 	with open('winner-ctrnn', 'wb') as f:
